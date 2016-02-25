@@ -1,0 +1,365 @@
+#!/usr/bin/env ruby
+
+require 'lcd/char16x2'
+require 'pi_piper'
+require 'inifile'
+require 'csv'
+
+require './cerevoice.rb'
+
+class PowerException < RuntimeError
+end
+
+class PiButtons
+  def PiButtons.is_select_pressed?
+      select_gpio = PiPiper::Pin.new   :pin => 26, :pull => :up
+      select_gpio.read == 0
+  end
+  
+  def PiButtons.wait_for_button(lcd)
+      power_gpio = PiPiper::Pin.new    :pin => 21, :pull => :up
+      select_gpio = PiPiper::Pin.new   :pin => 26, :pull => :up
+      next_gpio = PiPiper::Pin.new     :pin => 20, :pull => :up
+      previous_gpio = PiPiper::Pin.new :pin => 16, :pull => :up
+      
+      while(true) do
+        #p "P: #{power_gpio.read} S: #{select_gpio.read} N: #{next_gpio.read} P: #{previous_gpio.read}"
+        buttons = lcd.buttons
+        return :select if (buttons >> Adafruit::LCD::Char16x2::SELECT) & 1 > 0
+        return :next if (buttons >> Adafruit::LCD::Char16x2::DOWN) & 1 > 0
+        return :next if (buttons >> Adafruit::LCD::Char16x2::RIGHT) & 1 > 0
+        return :previous if (buttons >> Adafruit::LCD::Char16x2::UP) & 1 > 0
+        return :previous if (buttons >> Adafruit::LCD::Char16x2::LEFT) & 1 > 0
+        if(select_gpio.read != 1) then
+          while(select_gpio.read != 1) do
+            sleep 0.2
+          end
+          return :select
+        end
+        if(next_gpio.read != 1) then
+          while(next_gpio.read != 1) do
+            sleep 0.2
+          end
+          return :next
+        end
+        if(previous_gpio.read != 1) then
+          while(previous_gpio.read != 1) do
+            sleep 0.2
+          end
+          return :previous
+        end
+        raise PowerException if power_gpio.read != 0
+        sleep 0.1
+      end
+  end
+end
+
+class LCDYesNo
+  def initialize(lcd, question)
+    @lcd = lcd
+    @question = question
+  end
+  
+  def get_answer
+    answer = false
+    while(true) do
+      @lcd.clear
+      @lcd.message "#{@question}\n#{answer ? 'Yes' : 'No'}"
+      button = PiButtons.wait_for_button(@lcd)
+      case button
+        when :next, :prev
+          answer = !answer
+        when :select
+          return answer
+      end
+    end
+  end
+end
+
+class LCDAdjustTime
+  def initialize(lcd, label, value, adjust_by)
+    @lcd = lcd
+    @label = label
+    @value = value
+    @adjust_by = adjust_by
+  end
+  
+  def get_value
+    while(true) do
+      @lcd.clear
+      @lcd.message "#{@label}\n#{secs_to_ms(@value)}"
+      button = PiButtons.wait_for_button(@lcd)
+      case button
+        when :previous
+          @value -= @adjust_by
+        when :next
+          @value += @adjust_by
+        when :select
+          return @value
+      end
+    end
+  end
+end
+
+class LCDMenu
+  def initialize(lcd, label, items)
+    @lcd = lcd
+    @items = items
+    @label = label
+  end
+  
+  def get_selection
+    selected_idx = 0
+
+    @lcd.clear
+    @lcd.message "Select #{@label}\n#{@items[selected_idx].ljust(16, " ")}"
+    while true do
+      button = PiButtons.wait_for_button(@lcd)
+      case button
+        when :next
+          selected_idx += 1
+          selected_idx = 0 if selected_idx > @items.length-1
+          @lcd.message "Select #{@label}\n#{@items[selected_idx].ljust(16, " ")}"
+        when :previous
+          selected_idx -= 1
+          selected_idx = @items.length-1 if selected_idx < 0
+          @lcd.message "Select #{@label}\n#{@items[selected_idx].ljust(16, " ")}"
+        when :select
+          return @items[selected_idx]
+      end
+    end
+  end
+end
+
+class TimerProcess
+  def initialize(process_file)
+    process_csv = CSV.read(process_file)
+    process_csv.shift
+    @steps = []
+    process_csv.each do |step_data|
+      backlight = :off
+      case step_data[4].upcase
+        when "Y"
+          backlight = :on
+        when "H"
+          backlight = :half
+      end
+      @steps.push TimerProcessStep.new(step_data[1], step_data[0], step_data[2].to_i, step_data[3].upcase == "Y" ? true : false, backlight)
+    end
+  end
+  
+  def [](idx)
+    @steps[idx]
+  end
+  
+  def each_step
+    @steps.each do |step|
+      yield step
+    end
+  end
+  
+  def steps
+    @steps
+  end
+end
+
+class TimerProcessStep
+  attr_reader :short_name, :long_name, :tweakable, :backlight
+  attr_accessor :seconds
+
+  def initialize(short_name, long_name, seconds, tweakable, backlight)
+    @short_name = short_name
+    @long_name = long_name
+    @seconds = seconds
+    @tweakable = tweakable
+    @backlight = backlight
+  end
+end
+
+class Speech
+  def initialize(username, password)
+    @cerevoice = CereVoice.new(username, password, "speech_cache")
+  end
+  
+  def say(text)
+    speech_file = @cerevoice.render_speech(text)
+    system "mpg321 #{speech_file} &"
+  end
+  
+  def say_wait(text)
+    speech_file = @cerevoice.render_speech(text)
+    system "mpg321 #{speech_file}"
+  end
+end
+
+class Sound
+  def Sound.play(file)
+    system "aplay sounds/#{file}.wav &"
+  end
+  
+  def Sound.play_wait(file)
+    system "aplay sounds/#{file}.wav"
+  end
+end
+
+def secs_to_ms(secs)
+  sprintf("%d:%02d", secs / 60, secs % 60)
+end
+
+def secs_to_ms_words(secs)
+  if(secs > 60 && secs % 60 > 0) then
+    sprintf("%d minutes and %2d seconds", secs / 60, secs % 60)
+  elsif(secs > 60 && secs % 60 == 0) then
+    sprintf("%d minutes", secs / 60)
+  else
+    sprintf("%2d seconds", secs)
+  end
+end
+
+def wait_for_select(lcd)
+  until(PiButtons::wait_for_button(lcd) == :select) do
+    sleep 0.1
+  end
+end
+
+cfg = IniFile.load("/etc/darkroomtimer.conf")
+
+@lcd = Adafruit::LCD::Char16x2.new
+lcd = @lcd
+lcd.backlight(Adafruit::LCD::Char16x2::RED)
+lcd.clear
+speech_engine = Speech.new(cfg['Cerevoice']['UserID'], cfg['Cerevoice']['Password'])
+
+def handle_sleep(lcd)
+  select_gpio = PiPiper::Pin.new   :pin => 26, :pull => :up
+  next_gpio = PiPiper::Pin.new     :pin => 20, :pull => :up
+  power_gpio = PiPiper::Pin.new    :pin => 21, :pull => :up
+  lcd.clear
+  lcd.message "  System Off  "
+  lcd.backlight Adafruit::LCD::Char16x2::OFF
+  while(power_gpio.read != 0) do
+    if(next_gpio.read == 0 && select_gpio.read == 0) then
+      lcd.clear
+      lcd.backlight Adafruit::LCD::Char16x2::WHITE
+      lcd.message "Shutting down..."
+      system "/sbin/shutdown -h now"
+    end
+    sleep 0.25
+  end
+  lcd.backlight Adafruit::LCD::Char16x2::RED
+  lcd.clear
+end
+
+def run_process(lcd, speech_engine, process_name, process, dry_run = false)
+  if(!dry_run) then
+    process.each_step do |step|
+      if(step.tweakable) then
+        tweak_yn = LCDYesNo.new(lcd, "Tweak #{step.short_name} time?")
+        next if !tweak_yn.get_answer
+        sec_adjust = LCDAdjustTime.new(lcd, step.short_name, step.seconds, 15)
+        step.seconds = sec_adjust.get_value
+      end
+    end 
+  end
+  lcd.backlight(Adafruit::LCD::Char16x2::OFF)
+  sleep 0.5 if !dry_run
+  step_idx = 0
+  while(step_idx < process.steps.length-1) do
+    step = process[step_idx]
+    if(step.backlight == :half or step.backlight == :off or (step_idx > 0 and process[step_idx-1].backlight == :off)) then
+      lcd.backlight(Adafruit::LCD::Char16x2::OFF)
+    else
+      lcd.backlight(Adafruit::LCD::Char16x2::RED)
+    end
+    process_info = "#{process_name} #{step.short_name}".center(16)
+    lcd.clear
+    lcd.message "#{process_info}\n Ready to Start "
+    speech_engine.say "Ready to start #{process_name} #{step.long_name.downcase} for #{secs_to_ms_words(step.seconds)}."
+    select_pressed = false
+    while(!dry_run) do
+      case PiButtons::wait_for_button(lcd)
+        when :select
+          select_pressed = true
+          break
+        when :next
+          next if step_idx == process.steps.length-1
+          step_idx += 1
+          break
+        when :previous
+          next if step_idx == 0
+          step_idx -= 1
+          break
+      end
+    end
+    redo if !select_pressed && !dry_run
+    Sound.play "start"
+
+    start_time = Time.now
+    step_aborted = false
+    secs_left = step.seconds
+    while(Time.now - start_time < step.seconds) do
+      if(dry_run) then
+        break if secs_left <= 0 
+        secs_left -= 1
+      else
+        secs_left = (step.seconds - (Time.now - start_time)).to_i
+        break if Time.now - start_time >= step.seconds
+      end
+      process_time = "T:#{secs_to_ms(step.seconds)} R:#{secs_to_ms(secs_left)}".center(16)
+      lcd.home
+      lcd.message "#{process_info}\n#{process_time}"
+      
+      if(PiButtons.is_select_pressed?) then
+        speech_engine.say "#{step.short_name} aborted."
+        step_aborted = true
+        break
+      end
+      if(step.backlight == :half && (step.seconds / 2).to_i == secs_left.to_i) then
+        lcd.backlight Adafruit::LCD::Char16x2::RED
+        speech_engine.say "Paper is now light safe."
+      elsif((secs_left % 30 == 0 and secs_left > 5) or secs_left == 5) then
+        speech_engine.say "#{secs_to_ms_words(secs_left)} left" if (secs_left % 30 == 0 and secs_left > 5) or secs_left == 5
+      elsif(secs_left % 5 == 0) then
+        Sound.play "click"
+      end
+      sleep 1 if !dry_run
+    end
+    
+    if(step_aborted) then
+      Sound.play "abort"
+      speech_engine.say_wait "#{step.long_name.downcase} aborted."
+    else
+      Sound.play_wait "stop"
+      speech_engine.say_wait "#{process_name} #{step.long_name.downcase} complete."
+      step_idx += 1
+    end
+  end
+end
+
+def render_process(lcd, speech_engine, process_name, process)
+  return if File.exist? "processes/#{process_name}.rendered"
+  lcd.clear
+  lcd.message "Wait, rendering."
+  sleep 1
+  run_process lcd, speech_engine, process_name, process, true
+  File.open("processes/#{process_name}.rendered", "w") {}
+end
+
+while(true) do
+  begin
+    lcd.backlight(Adafruit::LCD::Char16x2::RED)
+    processes = []
+    Dir.glob("processes/*.csv").each do |filename|
+      processes.push File.basename(filename).split(/\./).first
+    end
+    process_menu = LCDMenu.new(lcd, "Process", processes)
+    process_name = process_menu.get_selection
+    process = TimerProcess.new("processes/#{process_name}.csv")
+    # render the speech required for this process
+    render_process lcd, speech_engine, process_name, process
+    run_process lcd, speech_engine, process_name, process
+  rescue PowerException
+    handle_sleep(lcd)
+  end
+end
+
