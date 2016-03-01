@@ -1,3 +1,5 @@
+# TODO: gem-ify this separately
+
 require 'net/http'
 require 'xmlsimple'
 require 'digest'
