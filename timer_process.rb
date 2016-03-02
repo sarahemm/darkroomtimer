@@ -1,5 +1,8 @@
 class TimerProcess
-  def initialize(process_file)
+  attr_reader :name
+  
+  def initialize(process_file, process_name)
+    @name = process_name
     process_csv = CSV.read(process_file)
     process_csv.shift
     @steps = []
@@ -11,7 +14,7 @@ class TimerProcess
         when "H"
           backlight = :half
       end
-      @steps.push TimerProcessStep.new(step_data[1], step_data[0], step_data[2].to_i, step_data[3].upcase == "Y" ? true : false, backlight)
+      @steps.push TimerProcessStep.new(self, step_data[1], step_data[0], step_data[2].to_i, step_data[3].upcase == "Y" ? true : false, backlight)
     end
   end
   
@@ -31,21 +34,33 @@ class TimerProcess
 end
 
 class TimerProcessStep
-  attr_reader :short_name, :long_name, :tweakable, :backlight
+  attr_reader :process, :short_name, :long_name, :tweakable, :backlight, :phrases
   attr_accessor :seconds
 
-  def initialize(short_name, long_name, seconds, tweakable, backlight)
+  def initialize(process, short_name, long_name, seconds, tweakable, backlight)
+    @process = process
     @short_name = short_name
     @long_name = long_name
     @seconds = seconds
     @tweakable = tweakable
     @backlight = backlight
+    
+    setup_phrases
+  end
+  
+  def setup_phrases
+    @phrases = Hash.new
+    @phrases[:ready_to_start] = "Ready to start #{@process.name} #{@long_name.downcase} for #{secs_to_ms_words(@seconds)}."
+    @phrases[:time_left] = "%s left"
+    @phrases[:light_safe] = "Paper is now light safe."
+    @phrases[:aborted] = "#{@long_name.downcase} aborted."
+    @phrases[:complete] = "#{@process.name} #{@long_name.downcase} complete."
   end
   
   def run
     start_time = Time.now
     while(Time.now - start_time < @seconds) do
-      secs_elapsed = Time.now - start_time
+      secs_elapsed = (Time.now - start_time).to_i
       secs_left = @seconds - secs_elapsed
       
       yield secs_left

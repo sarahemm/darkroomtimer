@@ -59,7 +59,7 @@ def handle_sleep(lcd)
   lcd.clear
 end
 
-def run_process(screen, input, speech_engine, process_name, process)
+def run_process(screen, input, speech_engine, process)
   process.each_step do |step|
     if(step.tweakable) then
       tweak_yn = LCDYesNo.new(screen, input, "Tweak #{step.short_name} time?")
@@ -77,10 +77,10 @@ def run_process(screen, input, speech_engine, process_name, process)
     else
       screen.background_colour :red
     end
-    process_info = "#{process_name} #{step.short_name}".center(16)
+    process_info = "#{process.name} #{step.short_name}".center(16)
     screen.clear
     screen.write "#{process_info}\n Ready to Start "
-    speech_engine.say "Ready to start #{process_name} #{step.long_name.downcase} for #{secs_to_ms_words(step.seconds)}."
+    speech_engine.say step.phrases[:ready_to_start]
     select_pressed = false
     case input.wait_for_button
       when :select
@@ -101,14 +101,14 @@ def run_process(screen, input, speech_engine, process_name, process)
       screen.write "#{process_info}\n#{process_time}"
       if(input.is_select_pressed?) then
         Sound.play "abort"
-        speech_engine.say_wait "#{step.long_name.downcase} aborted."
+        speech_engine.say_wait step.phrases[:aborted]
         break true
       end
       if(step.backlight == :half && (step.seconds / 2).to_i == secs_left.to_i) then
         screen.background_colour :red
-        speech_engine.say "Paper is now light safe."
+        speech_engine.say step.phrases[:light_safe]
       elsif((secs_left % 30 == 0 and secs_left > 5) or secs_left == 5) then
-        speech_engine.say "#{secs_to_ms_words(secs_left)} left" if (secs_left % 30 == 0 and secs_left > 5) or secs_left == 5
+        speech_engine.say sprintf(step.phrases[:time_left], secs_to_ms_words(secs_left)) if (secs_left % 30 == 0 and secs_left > 5) or secs_left == 5
       elsif(secs_left % 5 == 0) then
         Sound.play "click"
       end
@@ -116,7 +116,7 @@ def run_process(screen, input, speech_engine, process_name, process)
     redo if step_aborted
     
     Sound.play_wait "stop"
-    speech_engine.say_wait "#{process_name} #{step.long_name.downcase} complete."
+    speech_engine.say_wait step.phrases[:complete]
     step_idx += 1
   end
 end
@@ -144,10 +144,10 @@ while(true) do
     end
     process_menu = LCDMenu.new(screen, input, "Process", processes)
     process_name = process_menu.get_selection
-    process = TimerProcess.new("processes/#{process_name}.csv")
+    process = TimerProcess.new("processes/#{process_name}.csv", process_name)
 #    # render the speech required for this process
 #    render_process screen, speech_engine, process_name, process
-    run_process screen, input, speech, process_name, process
+    run_process screen, input, speech, process
 #  rescue PowerException
 #    handle_sleep(screen)
   end
