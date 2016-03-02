@@ -121,12 +121,24 @@ def run_process(screen, input, speech_engine, process)
   end
 end
 
-def render_process(lcd, speech_engine, process_name, process)
-  return if File.exist? "processes/#{process_name}.rendered"
-  lcd.clear
-  lcd.message "Wait, rendering."
-  sleep 1
-  run_process lcd, speech_engine, process_name, process, true
+def render_process(screen, speech, process)
+  return if File.exist? "processes/#{process.name}.rendered"
+  screen.clear
+  screen.write "Wait, rendering."
+  process.steps.each do |step|
+    step.phrases.each do |phrase_key, phrase|
+      if(phrase.include? "%s") then
+        # phrase includes time left, so cycle through all the times this step needs
+        secs_to_prepare = step.seconds
+        secs_to_prepare += 180 if step.tweakable # assume the user might add up to 3 minutes
+        (0..secs_to_prepare).step(30).each do |secs_left|
+          speech.prepare sprintf(phrase, secs_to_ms_words(secs_left))
+        end
+      else
+        speech.prepare phrase
+      end
+    end
+  end
   File.open("processes/#{process_name}.rendered", "w") {}
 end
 
@@ -145,8 +157,7 @@ while(true) do
     process_menu = LCDMenu.new(screen, input, "Process", processes)
     process_name = process_menu.get_selection
     process = TimerProcess.new("processes/#{process_name}.csv", process_name)
-#    # render the speech required for this process
-#    render_process screen, speech_engine, process_name, process
+    render_process screen, speech, process
     run_process screen, input, speech, process
 #  rescue PowerException
 #    handle_sleep(screen)

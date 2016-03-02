@@ -10,7 +10,12 @@ class TimerUI
       speech_file = @cerevoice.render_speech(text)
       system "mpg321 #{speech_file} &"
     end
-  
+    
+    def prepare(text)
+      # render the speech to a file in the cache, but don't actually play it
+      @cerevoice.render_speech text
+    end
+    
     def say_wait(text)
       speech_file = @cerevoice.render_speech(text)
       system "mpg321 #{speech_file}"

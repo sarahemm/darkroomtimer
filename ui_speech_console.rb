@@ -7,7 +7,11 @@ class TimerUI
     def say(text)
       puts "SPEECH: #{text}"
     end
-  
+    
+    def prepare(text)
+      puts "PREPARE SPEECH: #{text}"
+    end
+    
     def say_wait(text)
       puts "SPEECH: #{text}"
     end
