@@ -24,12 +24,16 @@ def secs_to_ms(secs)
 end
 
 def secs_to_ms_words(secs)
+  s = "s"
   if(secs > 60 && secs % 60 > 0) then
-    sprintf("%d minutes and %2d seconds", secs / 60, secs % 60)
+    s = "" if secs / 60 == 1
+    sprintf("%d minute#{s} and %2d seconds", secs / 60, secs % 60)
   elsif(secs > 60 && secs % 60 == 0) then
-    sprintf("%d minutes", secs / 60)
+    s = "" if secs / 60 == 1
+    sprintf("%d minute#{s}", secs / 60)
   else
-    sprintf("%2d seconds", secs)
+    s = "" if secs == 1
+    sprintf("%2d second#{s}", secs)
   end
 end
 
@@ -139,7 +143,7 @@ def render_process(screen, speech, process)
       end
     end
   end
-  File.open("processes/#{process_name}.rendered", "w") {}
+  File.open("processes/#{process.name}.rendered", "w") {}
 end
 
 cfg = IniFile.load("/etc/darkroomtimer.conf")
