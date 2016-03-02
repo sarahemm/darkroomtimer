@@ -41,4 +41,15 @@ class TimerProcessStep
     @tweakable = tweakable
     @backlight = backlight
   end
+  
+  def run
+    start_time = Time.now
+    while(Time.now - start_time < @seconds) do
+      secs_elapsed = Time.now - start_time
+      secs_left = @seconds - secs_elapsed
+      
+      yield secs_left
+      sleep 1
+    end
+  end
 end

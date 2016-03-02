@@ -59,19 +59,16 @@ def handle_sleep(lcd)
   lcd.clear
 end
 
-def run_process(screen, input, speech_engine, process_name, process, dry_run = false)
-  if(!dry_run) then
-    process.each_step do |step|
-      if(step.tweakable) then
-        tweak_yn = LCDYesNo.new(screen, input, "Tweak #{step.short_name} time?")
-        next if !tweak_yn.get_answer
-        sec_adjust = LCDAdjustTime.new(screen, input, step.short_name, step.seconds, 15)
-        step.seconds = sec_adjust.get_value
-      end
-    end 
-  end
-  screen.background_colour :off
-  sleep 0.5 if !dry_run
+def run_process(screen, input, speech_engine, process_name, process)
+  process.each_step do |step|
+    if(step.tweakable) then
+      tweak_yn = LCDYesNo.new(screen, input, "Tweak #{step.short_name} time?")
+      next if !tweak_yn.get_answer
+      sec_adjust = LCDAdjustTime.new(screen, input, step.short_name, step.seconds, 15)
+      step.seconds = sec_adjust.get_value
+    end
+  end 
+
   step_idx = 0
   while(step_idx < process.steps.length-1) do
     step = process[step_idx]
@@ -85,63 +82,42 @@ def run_process(screen, input, speech_engine, process_name, process, dry_run = f
     screen.write "#{process_info}\n Ready to Start "
     speech_engine.say "Ready to start #{process_name} #{step.long_name.downcase} for #{secs_to_ms_words(step.seconds)}."
     select_pressed = false
-    while(!dry_run) do
-      case input.wait_for_button
-        when :select
-          select_pressed = true
-          break
-        when :next
-          next if step_idx == process.steps.length-1
-          step_idx += 1
-          break
-        when :previous
-          next if step_idx == 0
-          step_idx -= 1
-          break
-      end
+    case input.wait_for_button
+      when :select
+        select_pressed = true
+      when :next
+        next if step_idx == process.steps.length-1
+        step_idx += 1
+      when :previous
+        next if step_idx == 0
+        step_idx -= 1
     end
-    redo if !select_pressed && !dry_run
+    redo if !select_pressed
     Sound.play "start"
 
-    start_time = Time.now
-    step_aborted = false
-    secs_left = step.seconds
-    while(Time.now - start_time < step.seconds) do
-      if(dry_run) then
-        break if secs_left <= 0 
-        secs_left -= 1
-      else
-        secs_left = (step.seconds - (Time.now - start_time)).to_i
-        break if Time.now - start_time >= step.seconds
-      end
+    step_aborted = step.run do |secs_left|
       process_time = "T:#{secs_to_ms(step.seconds)} R:#{secs_to_ms(secs_left)}".center(16)
       screen.home
       screen.write "#{process_info}\n#{process_time}"
-      
       if(input.is_select_pressed?) then
-        speech_engine.say "#{step.short_name} aborted."
-        step_aborted = true
-        break
+        Sound.play "abort"
+        speech_engine.say_wait "#{step.long_name.downcase} aborted."
+        break true
       end
       if(step.backlight == :half && (step.seconds / 2).to_i == secs_left.to_i) then
-        screen.background_color :red
+        screen.background_colour :red
         speech_engine.say "Paper is now light safe."
       elsif((secs_left % 30 == 0 and secs_left > 5) or secs_left == 5) then
         speech_engine.say "#{secs_to_ms_words(secs_left)} left" if (secs_left % 30 == 0 and secs_left > 5) or secs_left == 5
       elsif(secs_left % 5 == 0) then
         Sound.play "click"
       end
-      sleep 1 if !dry_run
     end
+    redo if step_aborted
     
-    if(step_aborted) then
-      Sound.play "abort"
-      speech_engine.say_wait "#{step.long_name.downcase} aborted."
-    else
-      Sound.play_wait "stop"
-      speech_engine.say_wait "#{process_name} #{step.long_name.downcase} complete."
-      step_idx += 1
-    end
+    Sound.play_wait "stop"
+    speech_engine.say_wait "#{process_name} #{step.long_name.downcase} complete."
+    step_idx += 1
   end
 end
 
