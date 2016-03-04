@@ -31,6 +31,7 @@ class TimerUI
         else
           Adafruit::LCD::Char16x2::OFF
       end
+      @lcd.backlight colour_code
     end
   end
 end
