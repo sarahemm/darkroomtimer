@@ -128,7 +128,6 @@ def run_process(screen, input, speech_engine, process)
 end
 
 def render_process(screen, speech, process)
-  return if File.exist? "processes/#{process.name}.rendered"
   screen.clear
   screen.write "Wait, rendering."
   process.steps.each do |step|
@@ -145,7 +144,6 @@ def render_process(screen, speech, process)
       end
     end
   end
-  File.open("processes/#{process.name}.rendered", "w") {}
 end
 
 cfg = IniFile.load("/etc/darkroomtimer.conf")
