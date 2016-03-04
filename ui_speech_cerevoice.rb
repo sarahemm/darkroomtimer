@@ -7,6 +7,7 @@ class TimerUI
     end
   
     def say(text)
+      text.gsub!("B&W", "Black and White")
       speech_file = @cerevoice.render_speech(text)
       system "mpg321 #{speech_file} &"
     end
