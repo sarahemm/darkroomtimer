@@ -16,6 +16,8 @@ require './ui_input_console.rb'
 #require './ui_speech_cerevoice.rb'
 require './ui_speech_console.rb'
 
+require './loader_files.rb'
+
 class PowerException < RuntimeError
 end
 
@@ -154,13 +156,7 @@ speech = TimerUI::Speech.new(cfg['Cerevoice']['UserID'], cfg['Cerevoice']['Passw
 while(true) do
   begin
     screen.background_colour :red
-    processes = []
-    Dir.glob("processes/*.csv").each do |filename|
-      processes.push File.basename(filename).split(/\./).first
-    end
-    process_menu = LCDMenu.new(screen, input, "Process", processes)
-    process_name = process_menu.get_selection
-    process = TimerProcess.new("processes/#{process_name}.csv", process_name)
+    process = ProcessLoader::load_process(screen, input)
     render_process screen, speech, process
     run_process screen, input, speech, process
 #  rescue PowerException
