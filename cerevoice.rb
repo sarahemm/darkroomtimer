@@ -18,7 +18,10 @@ class CereVoice
     cache_file = "#{@cache_dir}/#{text_hash}.mp3"
     
     # if the file is already cached, return that rather than re-rendering
-    return cache_file if File.exist?(cache_file)
+    if File.exist?(cache_file) then
+      puts "Using cached speech for #{text}."
+      return cache_file
+    end
     
     # ask cerevoice to render speech and get a URL for it
     cv_url = get_cv_speech(text, voice)
@@ -37,7 +40,7 @@ class CereVoice
   
   # use CereVoice Cloud to render text into speech and return a URL to the sound file
   def get_cv_speech(text, voice)
-    puts "Rendering #{text.length} characters of text in voice #{voice}"
+    puts "Rendering '#{text}' in voice #{voice}"
     
     # build the XML REST request
     request = {
