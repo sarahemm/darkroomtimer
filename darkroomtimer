@@ -39,30 +39,24 @@ def secs_to_ms_words(secs)
   end
 end
 
-def wait_for_select(lcd)
-  until(PiButtons::wait_for_button(lcd) == :select) do
-    sleep 0.1
-  end
-end
-
-def handle_sleep(lcd)
+def handle_sleep(screen)
   select_gpio = PiPiper::Pin.new   :pin => 26, :pull => :up
   next_gpio = PiPiper::Pin.new     :pin => 20, :pull => :up
   power_gpio = PiPiper::Pin.new    :pin => 21, :pull => :up
-  lcd.clear
-  lcd.message "  System Off  "
-  lcd.backlight Adafruit::LCD::Char16x2::OFF
+  screen.clear
+  screen.write "  System Off  "
+  screen.background_colour :off
   while(power_gpio.read != 0) do
     if(next_gpio.read == 0 && select_gpio.read == 0) then
-      lcd.clear
-      lcd.backlight Adafruit::LCD::Char16x2::WHITE
-      lcd.message "Shutting down..."
+      screen.clear
+      screen.background_colour :white
+      screen.write "Shutting down..."
       system "/sbin/shutdown -h now"
     end
     sleep 0.25
   end
-  lcd.backlight Adafruit::LCD::Char16x2::RED
-  lcd.clear
+  screen.background_colour :red
+  screen.clear
 end
 
 def run_process(screen, input, speech_engine, process)
@@ -157,8 +151,8 @@ while(true) do
     process = ProcessLoader::load_process(screen, input)
     render_process screen, speech, process
     run_process screen, input, speech, process
-#  rescue PowerException
-#    handle_sleep(screen)
+  rescue PowerException
+    handle_sleep(screen)
   end
 end
 
