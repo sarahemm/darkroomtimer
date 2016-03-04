@@ -1,5 +1,4 @@
 require 'lcd/char16x2'
-include Adafruit::LCD::Char16x2
 
 class TimerUI
   class Screen
@@ -24,13 +23,14 @@ class TimerUI
     def background_colour(colour)
       colour_code = case(colour)
         when :black
-          OFF
+          Adafruit::LCD::Char16x2::OFF
         when :red
-          RED
+          Adafruit::LCD::Char16x2::RED
         when :white
-          WHITE
-        when else
-          OFF
+          Adafruit::LCD::Char16x2::WHITE
+        else
+          Adafruit::LCD::Char16x2::OFF
       end
     end
+  end
 end

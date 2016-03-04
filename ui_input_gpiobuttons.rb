@@ -10,7 +10,7 @@ class TimerUI
         select_gpio.read == 0
     end
   
-    def wait_for_input
+    def wait_for_button
         power_gpio = PiPiper::Pin.new    :pin => 21, :pull => :up
         select_gpio = PiPiper::Pin.new   :pin => 26, :pull => :up
         next_gpio = PiPiper::Pin.new     :pin => 20, :pull => :up
