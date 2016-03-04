@@ -7,7 +7,7 @@ class ProcessLoader
       processes.push File.basename(filename).split(/\./).first
     end
     process_menu = LCDMenu.new(screen, input, "Process", processes)
-    process_name = process_menu.get_selection
-    process = TimerProcess.new("processes/#{process_name}.csv", process_name)
+    process_filename = process_menu.get_selection
+    process = TimerProcess.new("processes/#{process_filename}.csv")
   end
 end
