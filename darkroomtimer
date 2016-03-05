@@ -123,9 +123,13 @@ end
 
 def render_process(screen, speech, process)
   screen.clear
-  screen.write "Wait, rendering."
+  
+  step_nbr = 0;
   process.steps.each do |step|
+    phrase_nbr = 0
     step.phrases.each do |phrase_key, phrase|
+      screen.home
+      screen.write "Wait, rendering.\nDone #{step_nbr}/#{process.steps.length} (#{phrase_nbr}/#{step.phrases.length})";
       if(phrase.include? "%s") then
         # phrase includes time left, so cycle through all the times this step needs
         secs_to_prepare = step.seconds
@@ -136,7 +140,9 @@ def render_process(screen, speech, process)
       else
         speech.prepare phrase
       end
+      phrase_nbr += 1
     end
+    step_nbr += 1;
   end
 end
 
