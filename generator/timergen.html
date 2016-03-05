@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <meta charset="UTF-8"> 
+    <title>HackLab.TO Darkroom Timer Barcode Generator</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script> 
+    <script src="timergen.js"></script>
+  </head>
+  <body>
+    Process Name: <input type=text id='processname' maxlength=16>
+    <table border=1 id='timertable'>
+      <tr><th>Full Name</th><th>Short Name</th><th>Seconds</th><th>Allow Time Adjust?</th><th>Backlight</th></tr>
+      <tr>
+        <td><input type=text id='fullname0'></td>
+        <td><input type=text id='shortname0'></td>
+        <td><input type=text id='seconds0'></td>
+        <td><input type=checkbox id='tweak0'></td>
+        <td>
+          <select id='backlight0'>
+            <option value='N'>Off</option>
+            <option value='Y'>On</option>
+            <option value='H'>Half</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+    <input type=button onClick="addTableRow('#timertable');" value='Add Row'>
+    <input type=button onClick="generateBarcode('#timertable');" value='Generate Barcode'>
+    <br />
+    <br />
+    <textarea id='processdata' cols=40 rows=10 onblur="importProcessData($('#processdata').val());"></textarea>
+    <img id='barcode'/>
+  </body>
+</html>
+  
