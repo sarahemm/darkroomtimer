@@ -43,7 +43,7 @@ class TimerUI
     end
     
     def is_select_pressed?
-      false
+      return true if STDIN.read_nonblock(1) rescue nil
     end
     
     def wait_for_button
