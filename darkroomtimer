@@ -7,16 +7,17 @@ require './ui_helpers.rb'
 require './timer_process.rb'
 require './sound.rb'
 
-#require './ui_screen_lcd.rb'
-require './ui_screen_console.rb'
+require './ui_screen_lcd.rb'
+#require './ui_screen_console.rb'
 
-#require './ui_input_gpiobuttons.rb'
-require './ui_input_console.rb'
+require './ui_input_gpiobuttons.rb'
+#require './ui_input_console.rb'
 
-#require './ui_speech_cerevoice.rb'
-require './ui_speech_console.rb'
+require './ui_speech_cerevoice.rb'
+#require './ui_speech_console.rb'
 
-require './loader_files.rb'
+require './loader_barcode.rb'
+#require './loader_files.rb'
 
 class PowerException < RuntimeError
 end
