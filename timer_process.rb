@@ -1,8 +1,7 @@
 class TimerProcess
   attr_reader :name
   
-  def initialize(process_file)
-    process_csv = CSV.read(process_file)
+  def initialize(process_csv)
     @name = process_csv.shift[0]
     @steps = []
     process_csv.each do |step_data|

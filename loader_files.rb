@@ -8,6 +8,7 @@ class ProcessLoader
     end
     process_menu = LCDMenu.new(screen, input, "Process", processes)
     process_filename = process_menu.get_selection
-    process = TimerProcess.new("processes/#{process_filename}.csv")
+    process_csv = CSV.read("processes/#{process_filename}.csv")
+    process = TimerProcess.new(process_csv)
   end
 end
