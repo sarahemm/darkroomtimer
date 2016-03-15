@@ -14,7 +14,7 @@ class TimerUI
     def say(text)
       text = munge(text)
       speech_file = @cerevoice.render_speech(text)
-      system "mpg321 #{speech_file} &"
+      system "killall -q mpg321; mpg321 #{speech_file} &"
     end
     
     def prepare(text)
@@ -26,7 +26,7 @@ class TimerUI
     def say_wait(text)
       text = munge(text)
       speech_file = @cerevoice.render_speech(text)
-      system "mpg321 #{speech_file}"
+      system "killall -q mpg321; mpg321 #{speech_file}"
     end
   end
 end
