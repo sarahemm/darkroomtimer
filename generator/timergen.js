@@ -42,7 +42,7 @@ function generateBarcode(table) {
   processData = createProcessData(table);
   $('#processdata').val(processData);
   console.log(processData);
-  $('#barcode').attr('src', "http://api-bwipjs.rhcloud.com/?bcid=azteccode&text=" + encodeURIComponent(processData));
+  $('#barcode').attr('src', "http://api-bwipjs.rhcloud.com/?bcid=azteccode&scale=1&text=" + encodeURIComponent(processData));
 }
 
 function deleteTableRows(table) {
