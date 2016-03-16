@@ -18,6 +18,7 @@ class ProcessLoader
 
     trigger_gpio.off # active low
     process_data = ""
+    start_time = Time.now
     loop do
       read_data = port.read
       break if read_data == "" and process_data != ""
@@ -25,6 +26,17 @@ class ProcessLoader
       if(power_gpio.read != 0) then
         trigger_gpio.on
         raise PowerException
+      end
+      if(Time.now - start_time > 10) then
+        trigger_gpio.on
+        screen.clear
+        screen.write "Barcode Timeout\nSELECT to retry "
+        while input.wait_for_button != :select do
+        end
+        trigger_gpio.off
+        screen.clear
+        screen.write "Scan Barcode Now"
+        start_time = Time.now
       end
     end
     trigger_gpio.on
