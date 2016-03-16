@@ -29,7 +29,7 @@ function rowToProcessLine(row) {
 }
 
 function createProcessData(table) {
-  var processData = $('#processname').val() + "\n";
+  var processData = $('#processname').val() + "," + $('#processmod').val() + "," + $('#processcolour').val() + "\n";
   
   $(table).find('tr').each(function() {
     if($(this).find("input").val())
@@ -55,7 +55,14 @@ function importProcessData(data) {
   deleteTableRows('#timertable');
   
   var lines = data.split("\n");
-  $('#processname').val(lines[0]);
+  
+  var header_fields = lines[0].split(",");
+  $('#processname').val(header_fields[0]);
+  $('#processmod').val(header_fields[1]);
+  $('#processcolour option').each(function() {
+    $(this).prop('selected', $(this).val() == header_fields[2]);
+  });
+  
   for(var line_nbr = 2; line_nbr < lines.length; line_nbr++) {
     addTableRow('#timertable');
   }

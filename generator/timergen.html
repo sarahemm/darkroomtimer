@@ -6,7 +6,18 @@
     <script src="timergen.js"></script>
   </head>
   <body>
-    Process Name: <input type=text id='processname' maxlength=16>
+    Process Name: <input type=text id='processname' maxlength=16><br />
+    Process Modifier: <input type=text id='processmod' maxlength=5 size=5> stop(s)<br />
+    Process Colour: 
+    <select id='processcolour'>
+      <option value='RED'>Red</option>
+      <option value='GRN'>Green</option>
+      <option value='BLU'>Blue</option>
+      <option value='YEL'>Yellow</option>
+      <option value='TEA'>Teal</option>
+      <option value='PUR'>Purple</option>
+      <option value='WHT'>White</option>
+    </select>
     <table border=1 id='timertable'>
       <tr><th>Full Name</th><th>Short Name</th><th>Seconds</th><th>Allow Time Adjust?</th><th>Backlight</th></tr>
       <tr>
