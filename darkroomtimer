@@ -100,11 +100,7 @@ def run_process(screen, input, speech_engine, process)
       process_time = "T:#{secs_to_ms(step.seconds)} R:#{secs_to_ms(secs_left)}".center(16)
       screen.home
       screen.write "#{process_info}\n#{process_time}"
-      if(input.is_select_pressed?) then
-        Sound.play "abort"
-        speech_engine.say_wait step.phrases[:aborted]
-        break true
-      end
+      break true if input.is_select_pressed?
       if(step.backlight == :half && (step.seconds / 2).to_i == secs_left.to_i) then
         screen.background_colour process.colour
         speech_engine.say step.phrases[:light_safe]
@@ -114,7 +110,14 @@ def run_process(screen, input, speech_engine, process)
         Sound.play "click"
       end
     end
-    redo if step_aborted
+    screen.home
+    if(step_aborted) then
+      screen.write "#{process_info}\n    Aborted     "
+      Sound.play "abort"
+      speech_engine.say_wait step.phrases[:aborted]
+      redo
+    end
+    screen.write "#{process_info}\n    Complete    "
     
     Sound.play_wait "stop"
     speech_engine.say_wait step.phrases[:complete]
