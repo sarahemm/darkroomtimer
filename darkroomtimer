@@ -60,7 +60,7 @@ def handle_sleep(screen)
   screen.clear
 end
 
-def run_process(screen, input, speech_engine, process)
+def tweak_process(screen, input, process)
   process.each_step do |step|
     if(step.tweakable) then
       tweak_yn = LCDYesNo.new(screen, input, "Tweak #{step.short_name} time?")
@@ -69,9 +69,11 @@ def run_process(screen, input, speech_engine, process)
       step.seconds = sec_adjust.get_value
     end
   end 
+end
 
+def run_process(screen, input, speech_engine, process)
   step_idx = 0
-  while(step_idx < process.steps.length-1) do
+  while(step_idx < process.steps.length) do
     step = process[step_idx]
     if(step.backlight == :half or step.backlight == :off or (step_idx > 0 and process[step_idx-1].backlight == :off)) then
       screen.background_colour :off
@@ -123,6 +125,10 @@ def run_process(screen, input, speech_engine, process)
     speech_engine.say_wait step.phrases[:complete]
     step_idx += 1
   end
+
+  screen.clear
+  screen.write "#{process.name}\nProcess Complete"
+  speech_engine.say_wait process.steps[0].phrases[:process_complete]
 end
 
 def render_process(screen, speech, process)
@@ -159,8 +165,12 @@ while(true) do
   begin
     screen.background_colour :white
     process = ProcessLoader::load_process(screen, input)
+    p process
     render_process screen, speech, process
-    run_process screen, input, speech, process
+    tweak_process screen, input, process
+    loop do
+      run_process screen, input, speech, process
+    end
   rescue PowerException
     handle_sleep(screen)
   end
