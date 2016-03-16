@@ -26,6 +26,16 @@ class TimerUI
           Adafruit::LCD::Char16x2::OFF
         when :red
           Adafruit::LCD::Char16x2::RED
+        when :green
+          Adafruit::LCD::Char16x2::GREEN
+        when :blue
+          Adafruit::LCD::Char16x2::BLUE
+        when :yellow
+          Adafruit::LCD::Char16x2::YELLOW
+        when :teal
+          Adafruit::LCD::Char16x2::TEAL
+        when :purple
+          Adafruit::LCD::Char16x2::VIOLET
         when :white
           Adafruit::LCD::Char16x2::WHITE
         else
