@@ -12,31 +12,41 @@ class ProcessLoader
     process_obj = nil
     port = SerialPort.new("/dev/ttyAMA0", 9600, 8, 1, SerialPort::NONE)
     port.read_timeout = 100
+    port.read_nonblock rescue nil # empty any garbage from the buffer
     screen.clear
     screen.write "Scan Barcode Now"
 
+    trigger_gpio.off # active low
+    process_data = ""
+    start_time = Time.now
     loop do
-      trigger_gpio.off # active low
-      process_data = ""
-      loop do
-        read_data = port.read
-        break if read_data == "" and process_data != ""
-        process_data += read_data
-        if(input.is_select_pressed? and process_obj) then
-          trigger_gpio.on
-          return process_obj
-        end
-        if(power_gpio.read != 0) then
-          trigger_gpio.on
-          raise PowerException
-        end
+      read_data = port.read
+      break if read_data == "" and process_data != ""
+      process_data += read_data
+      if(power_gpio.read != 0) then
+        trigger_gpio.on
+        raise PowerException
       end
-      puts "doneish"
-      trigger_gpio.on
-      process_csv = CSV.parse(process_data)
-      screen.clear
-      screen.write "#{process_csv[0][0]}\nPress to Start"
-      process_obj = TimerProcess.new(process_csv)
+      if(Time.now - start_time > 10) then
+        trigger_gpio.on
+        screen.clear
+        screen.write "Barcode Timeout\nSELECT to retry "
+        while input.wait_for_button != :select do
+        end
+        trigger_gpio.off
+        screen.clear
+        screen.write "Scan Barcode Now"
+        start_time = Time.now
+      end
+    end
+    trigger_gpio.on
+    process_csv = CSV.parse(process_data)
+    process_obj = TimerProcess.new(process_csv)
+    screen.clear
+    screen.background_colour process_obj.colour
+    screen.write "#{process_obj.name} #{process_obj.modifier}\nPress to Start"
+    loop do
+      return process_obj if input.wait_for_button == :select
     end
   end
 end
