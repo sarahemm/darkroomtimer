@@ -56,7 +56,7 @@ def handle_sleep(screen)
     end
     sleep 0.25
   end
-  screen.background_colour :red
+  screen.background_colour :white
   screen.clear
 end
 
@@ -76,7 +76,7 @@ def run_process(screen, input, speech_engine, process)
     if(step.backlight == :half or step.backlight == :off or (step_idx > 0 and process[step_idx-1].backlight == :off)) then
       screen.background_colour :off
     else
-      screen.background_colour :red
+      screen.background_colour process.colour
     end
     process_info = "#{process.name} #{step.short_name}".center(16)
     screen.clear
@@ -106,7 +106,7 @@ def run_process(screen, input, speech_engine, process)
         break true
       end
       if(step.backlight == :half && (step.seconds / 2).to_i == secs_left.to_i) then
-        screen.background_colour :red
+        screen.background_colour process.colour
         speech_engine.say step.phrases[:light_safe]
       elsif((secs_left % 30 == 0 and secs_left > 5) or secs_left == 5) then
         speech_engine.say sprintf(step.phrases[:time_left], secs_to_ms_words(secs_left)) if (secs_left % 30 == 0 and secs_left > 5) or secs_left == 5
@@ -154,7 +154,7 @@ speech = TimerUI::Speech.new(cfg['Cerevoice']['UserID'], cfg['Cerevoice']['Passw
 
 while(true) do
   begin
-    screen.background_colour :red
+    screen.background_colour :white
     process = ProcessLoader::load_process(screen, input)
     render_process screen, speech, process
     run_process screen, input, speech, process

@@ -1,8 +1,29 @@
 class TimerProcess
-  attr_reader :name
+  attr_reader :name, :modifier, :colour
   
   def initialize(process_csv)
-    @name = process_csv.shift[0]
+    header = process_csv.shift
+    @name = header[0]
+    @modifier = header[1]
+    @colour = case(header[2])
+      when 'RED'
+        :red
+      when 'GRN'
+        :green
+      when 'BLU'
+        :blue
+      when 'YEL'
+        :yellow
+      when 'TEA'
+        :teal
+      when 'PUR'
+        :purple
+      when 'WHT'
+        :white
+      else
+        :red
+    end
+   
     @steps = []
     process_csv.each do |step_data|
       backlight = :off

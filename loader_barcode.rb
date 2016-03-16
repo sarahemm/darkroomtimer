@@ -28,11 +28,11 @@ class ProcessLoader
       end
     end
     trigger_gpio.on
-    p process_data
     process_csv = CSV.parse(process_data)
-    screen.clear
-    screen.write "#{process_csv[0][0]}\nPress to Start"
     process_obj = TimerProcess.new(process_csv)
+    screen.clear
+    screen.background_colour process_obj.colour
+    screen.write "#{process_obj.name} #{process_obj.modifier}\nPress to Start"
     loop do
       return process_obj if input.wait_for_button == :select
     end
