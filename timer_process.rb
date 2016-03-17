@@ -73,7 +73,7 @@ class TimerProcessStep
     @phrases[:time_left] = "%s left"
     @phrases[:light_safe] = "Paper is now light safe."
     @phrases[:aborted] = "#{@long_name.downcase} aborted."
-    @phrases[:complete] = "#{@process.name} #{@long_name.downcase} complete."
+    @phrases[:complete] = "#{@long_name.downcase} complete."
     @phrases[:process_complete] = "#{@process.name} process complete."
   end
   
