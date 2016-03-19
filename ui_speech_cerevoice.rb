@@ -8,6 +8,7 @@ class TimerUI
     
     def munge(text)
       text.gsub!("B&W", "Black and White")
+      text.gsub!("RA-4", "R Eh 4")
       text
     end
     
