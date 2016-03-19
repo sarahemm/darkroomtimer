@@ -167,7 +167,6 @@ while(true) do
   begin
     screen.background_colour :white
     process = ProcessLoader::load_process(screen, input)
-    p process
     render_process screen, speech, process
     tweak_process screen, input, process
     loop do
@@ -175,6 +174,11 @@ while(true) do
     end
   rescue PowerException
     handle_sleep(screen)
+  rescue
+    screen.clear
+    screen.write " TIMER  FAILURE \nSwitch to Manual"
+    speech.say "Timer failure, please use manual timer."
+    Kernel.exit 1
   end
 end
 
