@@ -95,6 +95,8 @@ def run_process(screen, input, speech_engine, process)
         next if step_idx == 0
         step_idx -= 1
     end
+    # if the previous step was dark, we'll want to turn the light on now
+    screen.background_colour process.colour if step.backlight == :on
     redo if !select_pressed
     Sound.play "start"
 
