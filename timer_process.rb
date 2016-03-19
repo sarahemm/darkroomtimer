@@ -69,11 +69,12 @@ class TimerProcessStep
   
   def setup_phrases
     @phrases = Hash.new
-    @phrases[:ready_to_start] = "Ready to start #{@process.name} #{@long_name.downcase} for #{secs_to_ms_words(@seconds)}."
+    @phrases[:ready_to_start] = "Ready to start #{@long_name.downcase} for #{secs_to_ms_words(@seconds)}."
     @phrases[:time_left] = "%s left"
     @phrases[:light_safe] = "Paper is now light safe."
     @phrases[:aborted] = "#{@long_name.downcase} aborted."
     @phrases[:complete] = "#{@long_name.downcase} complete."
+    @phrases[:process_starting] = "Starting process #{@process.name}."
     @phrases[:process_complete] = "#{@process.name} process complete."
   end
   

@@ -72,6 +72,10 @@ def tweak_process(screen, input, process)
 end
 
 def run_process(screen, input, speech_engine, process)
+  screen.clear
+  screen.write "Starting Process\n#{process.name}\n"
+  speech_engine.say_wait process.steps[0].phrases[:process_starting]
+  
   step_idx = 0
   while(step_idx < process.steps.length) do
     step = process[step_idx]
