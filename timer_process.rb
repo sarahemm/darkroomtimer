@@ -54,7 +54,6 @@ end
 
 class TimerProcessStep
   attr_reader :process, :short_name, :long_name, :tweakable, :backlight, :phrases
-  attr_accessor :seconds
 
   def initialize(process, short_name, long_name, seconds, tweakable, backlight)
     @process = process
@@ -87,5 +86,14 @@ class TimerProcessStep
       yield secs_left
       sleep 1
     end
+  end
+  
+  def seconds=(secs)
+    @seconds = secs
+    setup_phrases
+  end
+  
+  def seconds
+    @seconds
   end
 end
