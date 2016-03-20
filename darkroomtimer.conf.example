@@ -1,0 +1,9 @@
+[Modules]
+ui_screen=console
+ui_input=console
+ui_speech=console
+loader=files
+
+[Cerevoice]
+UserID=example123
+Password=example123

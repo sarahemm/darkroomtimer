@@ -7,17 +7,7 @@ require './ui_helpers.rb'
 require './timer_process.rb'
 require './sound.rb'
 
-#require './ui_screen_lcd.rb'
-require './ui_screen_console.rb'
-
-#require './ui_input_gpiobuttons.rb'
-require './ui_input_console.rb'
-
-#require './ui_speech_cerevoice.rb'
-require './ui_speech_console.rb'
-
-#require './loader_barcode.rb'
-require './loader_files.rb'
+# more requires below after the config file is read in
 
 class PowerException < RuntimeError
 end
@@ -163,6 +153,12 @@ def render_process(screen, speech, process)
 end
 
 cfg = IniFile.load("/etc/darkroomtimer.conf")
+module_cfg = cfg['Modules']
+require "./ui_screen_#{module_cfg['ui_screen']}.rb"
+require "./ui_input_#{module_cfg['ui_input']}.rb"
+require "./ui_speech_#{module_cfg['ui_speech']}.rb"
+require "./loader_#{module_cfg['loader']}.rb"
+
 screen = TimerUI::Screen.new
 input = TimerUI::Input.new
 speech = TimerUI::Speech.new(cfg['Cerevoice']['UserID'], cfg['Cerevoice']['Password'])
