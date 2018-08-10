@@ -140,9 +140,12 @@ def render_process(screen, speech, process)
         # phrase includes time left, so cycle through all the times this step needs
         secs_to_prepare = step.seconds
         secs_to_prepare += 180 if step.tweakable # assume the user might add up to 3 minutes
+        # render all of the 30 second notices
         (0..secs_to_prepare).step(30).each do |secs_left|
           speech.prepare sprintf(phrase, secs_to_ms_words(secs_left))
         end
+        # render the final 5 second notice
+        speech.prepare sprintf(phrase, secs_to_ms_words(5))
       else
         speech.prepare phrase
       end
