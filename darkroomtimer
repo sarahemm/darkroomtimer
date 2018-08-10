@@ -153,6 +153,12 @@ def render_process(screen, speech, process)
 end
 
 cfg = IniFile.load("/etc/darkroomtimer.conf")
+cfg = IniFile.load("./darkroomtimer.conf") if !cfg
+if(!cfg) then
+  STDERR.puts "Unable to load configuration from /etc/darkroomtimer.conf or ./darkroomtimer.conf. Aborting."
+  Kernel.exit 1
+end
+
 module_cfg = cfg['Modules']
 require "./ui_screen_#{module_cfg['ui_screen']}.rb"
 require "./ui_input_#{module_cfg['ui_input']}.rb"
