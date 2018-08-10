@@ -1,5 +1,5 @@
 processes/*
-speech_cache/*
+speech_cache/*.mp3
 *.gem
 *.rbc
 /.config
