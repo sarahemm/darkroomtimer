@@ -1,9 +1,7 @@
-require 'pi_piper'
-
 class TimerUI
   class Input
-    def initialize(gpio)
-      @gpio = gpio
+    def initialize()
+      @gpio = TimerExt::Manager.instance[:raspi].gpio
     end
     
     def is_select_pressed?

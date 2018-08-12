@@ -6,6 +6,7 @@ require 'csv'
 require './ui_helpers.rb'
 require './timer_process.rb'
 require './sound.rb'
+require './ext_manager.rb'
 
 # more requires below after the config file is read in
 
@@ -30,17 +31,8 @@ def secs_to_ms_words(secs)
   end
 end
 
-def get_gpios()
-  gpio = Hash.new
-  gpio[:select]   = PiPiper::Pin.new :pin => 26, :pull => :up
-  gpio[:next]     = PiPiper::Pin.new :pin => 20, :pull => :up
-  gpio[:previous] = PiPiper::Pin.new :pin => 16, :pull => :up
-  gpio[:power]    = PiPiper::Pin.new :pin => 21, :pull => :up
-  gpio[:trigger]  = PiPiper::Pin.new :pin => 25, :direction => :out
-  return gpio
-end
-
-def handle_sleep(screen, gpio)
+def handle_sleep(screen)
+  gpio = TimerExt::Manager.instance[:raspi].gpio
   screen.clear
   screen.write "  System Off  "
   screen.background_colour :off
@@ -161,27 +153,34 @@ end
 
 cfg = IniFile.load("/etc/darkroomtimer.conf")
 module_cfg = cfg['Modules']
+
+# load extension modules first since other modules often depend
+# on things provided by them
+module_cfg['ext'].split(",").each do |ext_module|
+  require "./ext_#{ext_module}.rb"
+end
+
+# now load the other types of modules
 require "./ui_screen_#{module_cfg['ui_screen']}.rb"
 require "./ui_input_#{module_cfg['ui_input']}.rb"
 require "./ui_speech_#{module_cfg['ui_speech']}.rb"
 require "./loader_#{module_cfg['loader']}.rb"
 
-@gpio = get_gpios
-screen = TimerUI::Screen.new
-input = TimerUI::Input.new(@gpio)
+screen = TimerUI::Screen.new()
+input = TimerUI::Input.new()
 speech = TimerUI::Speech.new(cfg['Cerevoice']['UserID'], cfg['Cerevoice']['Password'])
 
 while(true) do
   begin
     screen.background_colour :white
-    process = ProcessLoader::load_process(screen, input, @gpio)
+    process = ProcessLoader::load_process(screen, input)
     tweak_process screen, input, process
     render_process screen, speech, process
     loop do
       run_process screen, input, speech, process
     end
   rescue PowerException
-    handle_sleep(screen, @gpio)
+    handle_sleep(screen)
   rescue Exception => e
     STDERR.puts e 
     screen.clear

@@ -1,14 +1,10 @@
 # Load process information from a 2D barcode
 
 require 'serialport'
-require 'pi_piper'
 
 class ProcessLoader
-  def ProcessLoader.load_process(screen, input, gpio)
-    # barcode reader trigger line
-    #trigger_gpio = PiPiper::Pin.new :pin => 25, :direction => :out
-    #power_gpio = PiPiper::Pin.new   :pin => 21, :pull => :up
-
+  def ProcessLoader.load_process(screen, input)
+    gpio = TimerExt::Manager.instance[:raspi].gpio
     process_obj = nil
     port = SerialPort.new("/dev/ttyAMA0", 9600, 8, 1, SerialPort::NONE)
     port.read_timeout = 100

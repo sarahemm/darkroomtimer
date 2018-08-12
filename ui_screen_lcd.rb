@@ -2,7 +2,7 @@ require 'lcd/char16x2'
 
 class TimerUI
   class Screen
-    def initialize
+    def initialize()
       @lcd = Adafruit::LCD::Char16x2.new
       @lcd.backlight(Adafruit::LCD::Char16x2::RED)
       @lcd.clear
