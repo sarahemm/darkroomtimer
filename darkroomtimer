@@ -173,7 +173,10 @@ speech = TimerUI::Speech.new(cfg['Cerevoice']['UserID'], cfg['Cerevoice']['Passw
 while(true) do
   begin
     screen.background_colour :white
-    process = ProcessLoader::load_process(screen, input)
+    process = nil
+    while(!process) do
+      process = ProcessLoader::load_process(screen, input)
+    end
     tweak_process screen, input, process
     render_process screen, speech, process
     loop do
