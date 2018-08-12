@@ -3,6 +3,7 @@ ui_screen=console
 ui_input=console
 ui_speech=console
 loader=files
+# ext=extmod1,extmod2
 
 [Cerevoice]
 UserID=example123
