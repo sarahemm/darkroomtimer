@@ -2,40 +2,35 @@ require 'pi_piper'
 
 class TimerUI
   class Input
-    def initialize
+    def initialize(gpio)
+      @gpio = gpio
     end
     
     def is_select_pressed?
-        select_gpio = PiPiper::Pin.new   :pin => 26, :pull => :up
-        select_gpio.read == 0
+        @gpio[:select].read == 0
     end
   
     def wait_for_button
-        power_gpio = PiPiper::Pin.new    :pin => 21, :pull => :up
-        select_gpio = PiPiper::Pin.new   :pin => 26, :pull => :up
-        next_gpio = PiPiper::Pin.new     :pin => 20, :pull => :up
-        previous_gpio = PiPiper::Pin.new :pin => 16, :pull => :up
-      
         while(true) do
-          if(select_gpio.read != 1) then
-            while(select_gpio.read != 1) do
+          if(@gpio[:select].read != 1) then
+            while(@gpio[:select].read != 1) do
               sleep 0.2
             end
             return :select
           end
-          if(next_gpio.read != 1) then
-            while(next_gpio.read != 1) do
+          if(@gpio[:next].read != 1) then
+            while(@gpio[:next].read != 1) do
               sleep 0.2
             end
             return :next
           end
-          if(previous_gpio.read != 1) then
-            while(previous_gpio.read != 1) do
+          if(@gpio[:previous].read != 1) then
+            while(@gpio[:previous].read != 1) do
               sleep 0.2
             end
             return :previous
           end
-          raise PowerException if power_gpio.read != 0
+          raise PowerException if @gpio[:power].read != 0
           sleep 0.1
         end
     end

@@ -30,15 +30,22 @@ def secs_to_ms_words(secs)
   end
 end
 
-def handle_sleep(screen)
-  select_gpio = PiPiper::Pin.new   :pin => 26, :pull => :up
-  next_gpio = PiPiper::Pin.new     :pin => 20, :pull => :up
-  power_gpio = PiPiper::Pin.new    :pin => 21, :pull => :up
+def get_gpios()
+  gpio = Hash.new
+  gpio[:select]   = PiPiper::Pin.new :pin => 26, :pull => :up
+  gpio[:next]     = PiPiper::Pin.new :pin => 20, :pull => :up
+  gpio[:previous] = PiPiper::Pin.new :pin => 16, :pull => :up
+  gpio[:power]    = PiPiper::Pin.new :pin => 21, :pull => :up
+  gpio[:trigger]  = PiPiper::Pin.new :pin => 25, :direction => :out
+  return gpio
+end
+
+def handle_sleep(screen, gpio)
   screen.clear
   screen.write "  System Off  "
   screen.background_colour :off
-  while(power_gpio.read != 0) do
-    if(next_gpio.read == 0 && select_gpio.read == 0) then
+  while(gpio[:power].read != 0) do
+    if(gpio[:next].read == 0 && gpio[:select].read == 0) then
       screen.clear
       screen.background_colour :white
       screen.write "Shutting down..."
@@ -140,12 +147,9 @@ def render_process(screen, speech, process)
         # phrase includes time left, so cycle through all the times this step needs
         secs_to_prepare = step.seconds
         secs_to_prepare += 180 if step.tweakable # assume the user might add up to 3 minutes
-        # render all of the 30 second notices
         (0..secs_to_prepare).step(30).each do |secs_left|
           speech.prepare sprintf(phrase, secs_to_ms_words(secs_left))
         end
-        # render the final 5 second notice
-        speech.prepare sprintf(phrase, secs_to_ms_words(5))
       else
         speech.prepare phrase
       end
@@ -156,34 +160,30 @@ def render_process(screen, speech, process)
 end
 
 cfg = IniFile.load("/etc/darkroomtimer.conf")
-cfg = IniFile.load("./darkroomtimer.conf") if !cfg
-if(!cfg) then
-  STDERR.puts "Unable to load configuration from /etc/darkroomtimer.conf or ./darkroomtimer.conf. Aborting."
-  Kernel.exit 1
-end
-
 module_cfg = cfg['Modules']
 require "./ui_screen_#{module_cfg['ui_screen']}.rb"
 require "./ui_input_#{module_cfg['ui_input']}.rb"
 require "./ui_speech_#{module_cfg['ui_speech']}.rb"
 require "./loader_#{module_cfg['loader']}.rb"
 
+@gpio = get_gpios
 screen = TimerUI::Screen.new
-input = TimerUI::Input.new
+input = TimerUI::Input.new(@gpio)
 speech = TimerUI::Speech.new(cfg['Cerevoice']['UserID'], cfg['Cerevoice']['Password'])
 
 while(true) do
   begin
     screen.background_colour :white
-    process = ProcessLoader::load_process(screen, input)
+    process = ProcessLoader::load_process(screen, input, @gpio)
     tweak_process screen, input, process
     render_process screen, speech, process
     loop do
       run_process screen, input, speech, process
     end
   rescue PowerException
-    handle_sleep(screen)
-  rescue
+    handle_sleep(screen, @gpio)
+  rescue Exception => e
+    STDERR.puts e 
     screen.clear
     screen.write " TIMER  FAILURE \nSwitch to Manual"
     speech.say "Timer failure, please use manual timer."
