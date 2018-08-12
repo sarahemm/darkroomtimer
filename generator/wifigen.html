@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <meta charset="UTF-8"> 
+    <title>Darkroom Timer WiFi Barcode Generator</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script> 
+    <script src="wifigen.js"></script>
+  </head>
+  <body>
+    Operation: 
+    <select id='wifiop'>
+      <option value='ADD'>Add/Update Network</option>
+      <option value='DEL'>Delete Network</option>
+    </select><br />
+    SSID: <input type=text id='ssid' maxlength=64><br />
+    Password: <input type=text id='password' maxlength=64><br />
+    <input type=button onClick="generateBarcode();" value='Generate Barcode'>
+    <br />
+    <br />
+    <textarea id='wifidata' cols=40 rows=10></textarea>
+    <img id='barcode'/>
+  </body>
+</html>
+  
