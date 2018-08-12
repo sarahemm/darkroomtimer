@@ -37,6 +37,22 @@ class ProcessLoader
     end
     gpio[:trigger].on
     process_csv = CSV.parse(process_data)
+    # handle "extension barcodes" for things like reconfiguring wifi
+    # TODO: this should be handled somewhere not barcode-specific
+    if(match = process_csv[0][0].match(/^EXT-([^,]+)/)) then
+      ext_raw = match[1]
+      ext_module = ext_raw.downcase.to_sym
+      # make sure the module referenced in the barcode exists and understands how to receive data
+      if(!TimerExt::Manager.instance[ext_module] or !TimerExt::Manager.instance[ext_module].respond_to?(:process_data)) then
+        screen.clear
+        screen.write "Unknown  Barcode\nExt Type: #{ext_raw}"
+        sleep 3
+        return nil
+      end
+      TimerExt::Manager.instance[ext_module].process_data process_csv
+      sleep 1
+      return nil
+    end
     process_obj = TimerProcess.new(process_csv)
     screen.clear
     screen.background_colour process_obj.colour
