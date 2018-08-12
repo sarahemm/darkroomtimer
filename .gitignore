@@ -1,5 +1,6 @@
 processes/*
 speech_cache/*.mp3
+sounds/*.wav
 darkroomtimer.conf
 *.gem
 *.rbc
