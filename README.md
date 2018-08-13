@@ -39,3 +39,8 @@ Loads process definitions into the system. Process definitions are lists of step
   sen uses a Symbol MS4404 because there was a relatively cheap one on ebay, but
   any reader with a 'trigger' line to activate it should work with this module.
 
+## Extension (ext)
+Provide other services and functionality, used or called by the other modules.
+### Extension Modules
+- raspi - Provides interfacing with the Raspberry Pi's GPIO pins. This module is required by the other modules that are designed for this platform.
+- wifi - Allows special wifi barcodes to be scanned to add or remove network configuration from wpa\_supplicant without needing a console or network connection into the timer.
