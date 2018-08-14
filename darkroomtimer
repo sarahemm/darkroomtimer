@@ -6,7 +6,7 @@ require 'csv'
 require './ui_helpers.rb'
 require './timer_process.rb'
 require './sound.rb'
-require './ext_manager.rb'
+require './module_manager.rb'
 
 # more requires below after the config file is read in
 
@@ -32,7 +32,7 @@ def secs_to_ms_words(secs)
 end
 
 def handle_sleep(screen)
-  gpio = TimerExt::Manager.instance[:raspi].gpio
+  gpio = TimerModule::ExtensionModule::Manager.instance[:raspi].gpio
   screen.clear
   screen.write "  System Off  "
   screen.background_colour :off
@@ -152,12 +152,15 @@ def render_process(screen, speech, process)
 end
 
 cfg = IniFile.load("/etc/darkroomtimer.conf")
+cfg = IniFile.load("./darkroomtimer.conf") unless cfg
 module_cfg = cfg['Modules']
 
 # load extension modules first since other modules often depend
 # on things provided by them
-module_cfg['ext'].split(",").each do |ext_module|
-  require "./ext_#{ext_module}.rb"
+if(module_cfg['ext']) then
+  module_cfg['ext'].split(",").each do |ext_module|
+    require "./ext_#{ext_module}.rb"
+  end
 end
 
 # now load the other types of modules

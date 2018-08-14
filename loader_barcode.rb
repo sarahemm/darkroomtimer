@@ -4,7 +4,7 @@ require 'serialport'
 
 class ProcessLoader
   def ProcessLoader.load_process(screen, input)
-    gpio = TimerExt::Manager.instance[:raspi].gpio
+    gpio = TimerModule::Manager.instance[:ext][:raspi].gpio
     process_obj = nil
     port = SerialPort.new("/dev/ttyAMA0", 9600, 8, 1, SerialPort::NONE)
     port.read_timeout = 100
@@ -43,13 +43,13 @@ class ProcessLoader
       ext_raw = match[1]
       ext_module = ext_raw.downcase.to_sym
       # make sure the module referenced in the barcode exists and understands how to receive data
-      if(!TimerExt::Manager.instance[ext_module] or !TimerExt::Manager.instance[ext_module].respond_to?(:process_data)) then
+      if(!TimerModule::Manager.instance[:ext][ext_module] or !TimerModule::Manager.instance[:ext][ext_module].respond_to?(:process_data)) then
         screen.clear
         screen.write "Unknown  Barcode\nExt Type: #{ext_raw}"
         sleep 3
         return nil
       end
-      TimerExt::Manager.instance[ext_module].process_data process_csv
+      TimerModule::Manager.instance[:ext][ext_module].process_data process_csv
       sleep 1
       return nil
     end
