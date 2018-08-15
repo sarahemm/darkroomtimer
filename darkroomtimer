@@ -32,7 +32,7 @@ def secs_to_ms_words(secs)
 end
 
 def handle_sleep(screen)
-  gpio = TimerModule::ExtensionModule::Manager.instance[:raspi].gpio
+  gpio = TimerModule::Manager.instance[:raspi].gpio
   screen.clear
   screen.write "  System Off  "
   screen.background_colour :off

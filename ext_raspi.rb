@@ -17,4 +17,4 @@ class TimerModule
   end
 end
 
-TimerModule::ExtensionModule::Manager.instance.register(:ext, :raspi, TimerModule::ExtensionModule::RasPi.new)
+TimerModule::Manager.instance.register(:ext, :raspi, TimerModule::ExtensionModule::RasPi.new)
