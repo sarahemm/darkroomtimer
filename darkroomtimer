@@ -7,6 +7,7 @@ require './ui_helpers.rb'
 require './timer_process.rb'
 require './sound.rb'
 require './module_manager.rb'
+require './config_manager.rb'
 
 # more requires below after the config file is read in
 
@@ -151,9 +152,8 @@ def render_process(screen, speech, process)
   end
 end
 
-cfg = IniFile.load("/etc/darkroomtimer.conf")
-cfg = IniFile.load("./darkroomtimer.conf") unless cfg
-module_cfg = cfg['Modules']
+ConfigManager::load
+module_cfg = ConfigManager['Modules']
 
 # load extension modules first since other modules often depend
 # on things provided by them
@@ -171,7 +171,7 @@ require "./loader_#{module_cfg['loader']}.rb"
 
 screen = TimerModule::Manager.instance[:screen]
 input = TimerModule::Manager.instance[:input]
-speech = TimerUI::Speech.new(cfg['Cerevoice']['UserID'], cfg['Cerevoice']['Password'])
+speech = TimerModule::Manager.instance[:speech]
 
 while(true) do
   begin
