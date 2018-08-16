@@ -1,14 +1,15 @@
-class TimerUI
-  class Input
-    def initialize()
-      @gpio = TimerModule::Manager.instance[:raspi].gpio
-    end
+class TimerModule
+  class InputModule
+    class GPIOButtons
+      def initialize()
+        @gpio = TimerModule::Manager.instance[:raspi].gpio
+      end
     
-    def is_select_pressed?
-        @gpio[:select].read == 0
-    end
+      def is_select_pressed?
+          @gpio[:select].read == 0
+      end
   
-    def wait_for_button
+      def wait_for_button
         while(true) do
           if(@gpio[:select].read != 1) then
             while(@gpio[:select].read != 1) do
@@ -31,6 +32,9 @@ class TimerUI
           raise PowerException if @gpio[:power].read != 0
           sleep 0.1
         end
+      end
     end
   end
 end
+
+TimerModule::Manager.instance.register(:input, :gpiobuttons, TimerModule::InputModule::GPIOButtons.new)

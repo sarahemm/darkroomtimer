@@ -37,26 +37,30 @@ def get_key
   end
 end
 
-class TimerUI
-  class Input
-    def initialize
-    end
+class TimerModule
+  class InputModule
+    class Console
+      def initialize
+      end
     
-    def is_select_pressed?
-      return true if STDIN.read_nonblock(1) rescue nil
-    end
+      def is_select_pressed?
+        return true if STDIN.read_nonblock(1) rescue nil
+      end
     
-    def wait_for_button
-      case get_key
-        when :left, :up
-          :previous
-        when :right, :down
-          :next
-        when :enter
-          :select
-        when :exit
-          Kernel.exit 0
+      def wait_for_button
+        case get_key
+          when :left, :up
+            :previous
+          when :right, :down
+            :next
+          when :enter
+            :select
+          when :exit
+            Kernel.exit 0
+        end
       end
     end
   end
 end
+
+TimerModule::Manager.instance.register(:input, :console, TimerModule::InputModule::Console.new)

@@ -170,7 +170,7 @@ require "./ui_speech_#{module_cfg['ui_speech']}.rb"
 require "./loader_#{module_cfg['loader']}.rb"
 
 screen = TimerUI::Screen.new()
-input = TimerUI::Input.new()
+input = TimerModule::Manager.instance[:input]
 speech = TimerUI::Speech.new(cfg['Cerevoice']['UserID'], cfg['Cerevoice']['Password'])
 
 while(true) do
@@ -187,12 +187,12 @@ while(true) do
     end
   rescue PowerException
     handle_sleep(screen)
-  rescue Exception => e
-    STDERR.puts e 
-    screen.clear
-    screen.write " TIMER  FAILURE \nSwitch to Manual"
-    speech.say "Timer failure, please use manual timer."
-    Kernel.exit 1
+#  rescue Exception => e
+#    STDERR.puts e 
+#    screen.clear
+#    screen.write " TIMER  FAILURE \nSwitch to Manual"
+#    speech.say "Timer failure, please use manual timer."
+#    Kernel.exit 1
   end
 end
 

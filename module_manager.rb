@@ -31,5 +31,14 @@ class TimerModule
       @members[name] = instance
       puts "Collection item #{name} set to #{instance}."
     end
+
+    def method_missing(method, *args, &block)
+      retval = nil
+      @members.each do |key, member|
+        this_retval = member.send(method, *args, &block)
+        retval = this_retval if this_retval
+      end
+      retval
+    end
   end
 end
