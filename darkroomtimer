@@ -169,7 +169,7 @@ require "./ui_input_#{module_cfg['ui_input']}.rb"
 require "./ui_speech_#{module_cfg['ui_speech']}.rb"
 require "./loader_#{module_cfg['loader']}.rb"
 
-screen = TimerUI::Screen.new()
+screen = TimerModule::Manager.instance[:screen]
 input = TimerModule::Manager.instance[:input]
 speech = TimerUI::Speech.new(cfg['Cerevoice']['UserID'], cfg['Cerevoice']['Password'])
 
