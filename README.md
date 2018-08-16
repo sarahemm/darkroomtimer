@@ -6,20 +6,20 @@ Stores all steps of entire film-related processes and runs through them, giving 
 Built to be modular and extensible, to be able to run on different hardware and with different IO/UI options with minimal porting effort. Most existing modules are built around the Raspberry Pi, as that's what the developer (sen) runs this on in their darkroom.
 
 # Module Types
-## Screen (ui_screen)
+## Screen (screen)
 Drives the visual output device, used to perform initial setup before the lights have to be out, and runs in parallel with audio output.
 ### Screen Modules
 - console - Output to stdout, useful for debugging and testing.
 - lcd - Output to an Adafruit Raspberry Pi LCD Hat.
 
-## Input (ui_input)
+## Input (input)
 Accepts input, used to do initial setup before the lights are out, and to start and stop steps.
 ### Input Modules
 - console - Receive input from stdin, useful for debugging and testing.
 - gpiobuttons - Receive input from Raspberry Pi GPIOs, which will have buttons
   connected to them.
 
-## Speech (ui_speech)
+## Speech (speech)
 Renders and outputs speech, which is the main output used by the timer.
 ### Speech Modules
 - console - Output what would be speech as text on stdout, useful for debugging
