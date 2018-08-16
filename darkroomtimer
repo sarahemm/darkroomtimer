@@ -164,9 +164,9 @@ if(module_cfg['ext']) then
 end
 
 # now load the other types of modules
-require "./ui_screen_#{module_cfg['ui_screen']}.rb"
-require "./ui_input_#{module_cfg['ui_input']}.rb"
-require "./ui_speech_#{module_cfg['ui_speech']}.rb"
+require "./screen_#{module_cfg['screen']}.rb"
+require "./input_#{module_cfg['input']}.rb"
+require "./speech_#{module_cfg['speech']}.rb"
 require "./loader_#{module_cfg['loader']}.rb"
 
 screen = TimerModule::Manager.instance[:screen]
