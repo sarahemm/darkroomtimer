@@ -29,7 +29,6 @@ class TimerModule
   class Collection
     def initialize
       @members = Hash.new
-      puts "Initializing new module collection."
     end
 
     def +(instance)
@@ -38,7 +37,6 @@ class TimerModule
 
     def []=(name, instance)
       @members[name] = instance
-      puts "Collection item #{name} set to #{instance}."
     end
 
     def method_missing(method, *args, &block)
