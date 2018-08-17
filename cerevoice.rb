@@ -19,7 +19,7 @@ class CereVoice
     
     # if the file is already cached, return that rather than re-rendering
     if File.exist?(cache_file) then
-      puts "Using cached speech for #{text}."
+      puts "Using cached speech for #{text}"
       return cache_file
     end
     

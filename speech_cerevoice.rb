@@ -18,7 +18,7 @@ class TimerModule
       def say(text)
         text = munge(text)
         speech_file = @cerevoice.render_speech(text)
-        system "killall -q mpg321; mpg321 #{speech_file} &"
+        system "killall mpg321 2>/dev/null; mpg321 -q #{speech_file} 2>&1 | grep -v tcgetattr &"
       end
     
       def prepare(text)
@@ -30,7 +30,7 @@ class TimerModule
       def say_wait(text)
         text = munge(text)
         speech_file = @cerevoice.render_speech(text)
-        system "killall -q mpg321; mpg321 #{speech_file}"
+        system "killall mpg321 2>/dev/null; mpg321 -q #{speech_file} 2>&1 | grep -v tcgetattr"
       end
     end
   end
