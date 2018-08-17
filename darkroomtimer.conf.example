@@ -1,7 +1,7 @@
 [Modules]
-ui_screen=console
-ui_input=console
-ui_speech=console
+screen=console
+input=console
+speech=console,cerevoice
 loader=files
 # ext=extmod1,extmod2
 
