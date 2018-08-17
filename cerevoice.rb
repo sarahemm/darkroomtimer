@@ -14,6 +14,7 @@ class CereVoice
   end
   
   def render_speech(text, voice = "Hannah")
+    text.strip!
     text_hash = Digest::MD5.hexdigest text.downcase
     cache_file = "#{@cache_dir}/#{text_hash}.mp3"
     
