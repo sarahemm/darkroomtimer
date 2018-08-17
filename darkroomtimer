@@ -157,17 +157,13 @@ module_cfg = ConfigManager['Modules']
 
 # load extension modules first since other modules often depend
 # on things provided by them
-if(module_cfg['ext']) then
-  module_cfg['ext'].split(",").each do |ext_module|
-    require "./ext_#{ext_module}.rb"
-  end
-end
+TimerModule::Manager.load_type(:ext)
 
 # now load the other types of modules
-require "./screen_#{module_cfg['screen']}.rb"
-require "./input_#{module_cfg['input']}.rb"
-require "./speech_#{module_cfg['speech']}.rb"
-require "./loader_#{module_cfg['loader']}.rb"
+TimerModule::Manager.load_type(:screen)
+TimerModule::Manager.load_type(:input)
+TimerModule::Manager.load_type(:speech)
+TimerModule::Manager.load_type(:loader)
 
 screen = TimerModule::Manager.instance[:screen]
 input = TimerModule::Manager.instance[:input]

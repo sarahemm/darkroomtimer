@@ -4,6 +4,15 @@ class TimerModule
   class Manager
     include Singleton
     
+    # load all of one type of module
+    def self.load_type(category)
+      module_cfg = ConfigManager['Modules']
+      return nil if !module_cfg[category.to_s]
+      module_cfg[category.to_s].split(",").each do |a_module|
+        require "./#{category.to_s}_#{a_module}.rb"
+      end
+    end
+    
     # register a class as an external module
     def register(category, name, instance)
       @modules = Hash.new if !@modules
