@@ -9,19 +9,15 @@ class TimerModule
         text
       end
   
-      def say(text)
+      def say(text, wait = false)
         text = munge(text)
-        puts "SPEECH: #{text}"
+        wait_flag = wait ? " (wait)" : ""
+        puts "SPEECH#{wait_flag}: #{text}"
       end
     
       def prepare(text)
         text = munge(text)
         puts "PREPARE SPEECH: #{text}"
-      end
-    
-      def say_wait(text)
-        text = munge(text)
-        puts "SPEECH: #{text}"
       end
     end
   end

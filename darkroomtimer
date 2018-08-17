@@ -64,7 +64,7 @@ end
 def run_process(screen, input, speech_engine, process)
   screen.clear
   screen.write "Starting Process\n#{process.name}\n"
-  speech_engine.say_wait process.steps[0].phrases[:process_starting]
+  speech_engine.say process.steps[0].phrases[:process_starting], true
   
   step_idx = 0
   while(step_idx < process.steps.length) do
@@ -112,19 +112,19 @@ def run_process(screen, input, speech_engine, process)
     if(step_aborted) then
       screen.write "#{process_info}\n    Aborted     "
       Sound.play "abort"
-      speech_engine.say_wait step.phrases[:aborted]
+      speech_engine.say step.phrases[:aborted], true
       redo
     end
     screen.write "#{process_info}\n    Complete    "
     
     Sound.play_wait "stop"
-    speech_engine.say_wait step.phrases[:complete]
+    speech_engine.say step.phrases[:complete], true
     step_idx += 1
   end
 
   screen.clear
   screen.write "#{process.name}\nProcess Complete"
-  speech_engine.say_wait process.steps[0].phrases[:process_complete]
+  speech_engine.say process.steps[0].phrases[:process_complete], wait
 end
 
 def render_process(screen, speech, process)
