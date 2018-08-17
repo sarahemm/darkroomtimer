@@ -4,8 +4,8 @@ class TimerModule
   class SpeechModule
     class Cerevoice
       def initialize()
-        username = ConfigManager['CereVoice']['UserID']
-        password = ConfigManager['CereVoice']['Password']
+        username = ConfigManager['Cerevoice']['UserID']
+        password = ConfigManager['Cerevoice']['Password']
         @cerevoice = CereVoice.new(username, password, "speech_cache")
       end
     
