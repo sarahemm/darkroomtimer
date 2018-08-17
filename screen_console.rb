@@ -12,7 +12,7 @@ class TimerModule
         puts "# Clear Screen"
       end
     
-      def write(text)
+      def write(text, flags = [])
         puts text
       end
     

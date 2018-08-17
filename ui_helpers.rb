@@ -9,7 +9,7 @@ class LCDYesNo
     answer = false
     while(true) do
       @screen.clear
-      @screen.write "#{@question}\n#{answer ? 'Yes' : 'No'}"
+      @screen.write "#{@question}\n#{answer ? 'Yes' : 'No'}", :important
       button = @input.wait_for_button
       case button
         when :next, :prev
@@ -33,7 +33,7 @@ class LCDAdjustTime
   def get_value
     while(true) do
       @screen.clear
-      @screen.write "#{@label}\n#{secs_to_ms(@value)}"
+      @screen.write "#{@label}\n#{secs_to_ms(@value)}", :important
       button = @input.wait_for_button
       case button
         when :previous
@@ -59,18 +59,18 @@ class LCDMenu
     selected_idx = 0
 
     @screen.clear
-    @screen.write "Select #{@label}\n#{@items[selected_idx].ljust(16, " ")}"
+    @screen.write "Select #{@label}\n#{@items[selected_idx].ljust(16, " ")}", :important
     while true do
       button = @input.wait_for_button
       case button
         when :next
           selected_idx += 1
           selected_idx = 0 if selected_idx > @items.length-1
-          @screen.write "Select #{@label}\n#{@items[selected_idx].ljust(16, " ")}"
+          @screen.write "Select #{@label}\n#{@items[selected_idx].ljust(16, " ")}", :important
         when :previous
           selected_idx -= 1
           selected_idx = @items.length-1 if selected_idx < 0
-          @screen.write "Select #{@label}\n#{@items[selected_idx].ljust(16, " ")}"
+          @screen.write "Select #{@label}\n#{@items[selected_idx].ljust(16, " ")}", :important
         when :select
           return @items[selected_idx]
       end

@@ -35,13 +35,13 @@ end
 def handle_sleep(screen)
   gpio = TimerModule::Manager.instance[:raspi].gpio
   screen.clear
-  screen.write "  System Off  "
+  screen.write "  System Off  ", :important
   screen.background_colour :off
   while(gpio[:power].read != 0) do
     if(gpio[:next].read == 0 && gpio[:select].read == 0) then
       screen.clear
       screen.background_colour :white
-      screen.write "Shutting down..."
+      screen.write "Shutting down...", :important
       system "/sbin/shutdown -h now"
     end
     sleep 0.25
@@ -135,7 +135,7 @@ def render_process(screen, speech, process)
     phrase_nbr = 0
     step.phrases.each do |phrase_key, phrase|
       screen.home
-      screen.write "Wait, rendering.\nDone #{step_nbr}/#{process.steps.length} (#{phrase_nbr}/#{step.phrases.length})";
+      screen.write "Wait, rendering.\nDone #{step_nbr}/#{process.steps.length} (#{phrase_nbr}/#{step.phrases.length})", :line1important
       if(phrase.include? "%s") then
         # phrase includes time left, so cycle through all the times this step needs
         secs_to_prepare = step.seconds
@@ -143,6 +143,7 @@ def render_process(screen, speech, process)
         (0..secs_to_prepare).step(30).each do |secs_left|
           speech.prepare sprintf(phrase, secs_to_ms_words(secs_left))
         end
+        speech.prepare sprintf(phrase, secs_to_ms_words(5))
       else
         speech.prepare phrase
       end

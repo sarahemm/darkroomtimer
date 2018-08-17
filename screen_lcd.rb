@@ -17,7 +17,7 @@ class TimerModule
         @lcd.clear
       end
     
-      def write(text)
+      def write(text, flags = [])
         @lcd.message text
       end
     
